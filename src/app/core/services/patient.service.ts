@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -18,11 +18,15 @@ export class PatientService {
   ) { }
 
   save(patient: any): Observable<any> {
-    return this.http.post(this.saveUrl, JSON.stringify(patient));
+    let header = new HttpHeaders();
+    header = header.set('Content-Type', 'application/json; charset=utf-8');
+    return this.http.post(this.saveUrl, JSON.stringify(patient), {headers: header});
   }
 
   update(id: string, patient: any): Observable<any> {
-    return this.http.put(this.updateUrl + id, JSON.stringify(patient))
+    let header = new HttpHeaders();
+    header = header.set('Content-Type', 'application/json; charset=utf-8');
+    return this.http.put(this.updateUrl + id, JSON.stringify(patient), {headers: header})
   }
 
   findNextData(page: any, size: any): Observable<any> {

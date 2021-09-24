@@ -13,6 +13,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import { PatientService } from './core/services/patient.service';
+import { HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 
 
 @NgModule({
@@ -20,6 +23,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
     AppComponent
   ],
   imports: [
+    FormsModule,
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
@@ -30,9 +34,12 @@ import { FlexLayoutModule } from '@angular/flex-layout';
     MatTableModule,
     MatIconModule,
     MatPaginatorModule,
-    FlexLayoutModule
+    FlexLayoutModule,
+    HttpClientModule
   ],
-  providers: [],
+  providers: [
+    PatientService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

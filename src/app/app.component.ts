@@ -1,6 +1,9 @@
+import { formatDate } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
+import { PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
+import { PatientService } from './core/services/patient.service';
 
 export interface PeriodicElement {
   name: string;
@@ -27,25 +30,88 @@ const ELEMENT_DATA: PeriodicElement[] = [
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-  title = 'patient-web';
 
-  displayedColumns: string[] = ['action', 'position', 'name', 'weight', 'symbol'];
+  patient: any;
+  isCreateNew = true;
+
+  displayedColumns: string[] = ['action', 'id', 'firstName', 'lastName', 'email', 'phone', 'address'];
   dataSource: any;
 
-  email = new FormControl('', [Validators.required, Validators.email]);
+  currPage = 0;
+  length = 0;
+  pageSize = 0;
+  pageSizeOptions: number[] = [5, 10, 25, 100];
 
-  constructor() {
+  phoneFormControl = new FormControl('', [Validators.required, Validators.pattern('\d')]);
+  emailFormControl = new FormControl('', [Validators.required, Validators.email]);
 
+  constructor(
+    private patientService: PatientService,
+  ) {
+    this.patient = {};
   }
+
   ngOnInit(): void {
-    this.dataSource = new MatTableDataSource<PeriodicElement>(ELEMENT_DATA);
+    let pageEvent = new PageEvent();
+    pageEvent.pageIndex = 0;
+    pageEvent.pageSize = 5;
+    this.getPatientByPage(pageEvent);
+  }
+
+  refreshInquiry() {
+    let pageEvent = new PageEvent();
+    pageEvent.pageIndex = 0;
+    pageEvent.pageSize = 5;
+    this.getPatientByPage(pageEvent);
+    this.resetForm();
+  }
+
+
+  getPatientByPage(event: PageEvent){
+    console.log(event);
+    this.patientService.findNextData(event.pageIndex, event.pageSize).subscribe(resp => {
+      this.length = resp.content.length;
+      this.dataSource = new MatTableDataSource<PeriodicElement>(resp.content);
+    })
+  }
+
+  savePatient() {
+    console.log(this.patient);
+    this.patient.createdDate = formatDate(new Date(), 'dd/MM/yyyy HH:mm:ss', 'en');
+    this.patientService.save(this.patient).subscribe(resp => {
+      this.refreshInquiry();
+    });
+  }
+
+  updatePatient() {
+    this.patient.updatedDate = formatDate(new Date(), 'dd/MM/yyyy HH:mm:ss', 'en');
+    this.patientService.update(this.patient.id, this.patient).subscribe(resp => {
+      this.refreshInquiry();
+    })
+  }
+
+  selectPatient(selectedData: any) {
+    this.patient = selectedData;
+    this.isCreateNew = false;
+  }
+
+  deletePatient(data: any) {
+    this.patientService.delete(data.id).subscribe(resp => {
+      this.refreshInquiry();
+    })
+  }
+
+
+  resetForm() {
+    this.patient = {};
+    this.isCreateNew = true;
   }
 
   getErrorMessage() {
-    if (this.email.hasError('required')) {
+    if (this.emailFormControl.hasError('required')) {
       return 'You must enter a value';
     }
 
-    return this.email.hasError('email') ? 'Not a valid email' : '';
+    return this.emailFormControl.hasError('email') ? 'Not a valid email' : '';
   }
 }
